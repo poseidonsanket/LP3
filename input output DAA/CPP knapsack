@@ -1,0 +1,104 @@
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// Item class to store value and weight of each item
+class Item {
+public:
+    int value, weight;
+
+    // Constructor to initialize value and weight of an item
+    Item(int value, int weight) {
+        this->value = value;
+        this->weight = weight;
+    }
+
+    // Value-to-weight ratio for comparison
+    double valueToWeightRatio() const {
+        return (double)value / weight;
+    }
+};
+
+// Comparator function to sort items by value-to-weight ratio in descending order
+bool compare(Item item1, Item item2) {
+    return item1.valueToWeightRatio() > item2.valueToWeightRatio();
+}
+
+int main() {
+    int n;
+
+    // Input number of items
+    cout << "Enter the number of items: ";
+    cin >> n;
+
+    vector<Item> items;
+
+    // Input value and weight of each item
+    for (int i = 0; i < n; i++) {
+        int value, weight;
+        cout << "Enter value and weight of item " << (i + 1) << ": ";
+        cin >> value >> weight;
+        items.push_back(Item(value, weight));
+    }
+
+    // Input the total weight capacity of the knapsack
+    int capacity;
+    cout << "Enter the maximum capacity of the knapsack: ";
+    cin >> capacity;
+
+    // Sort items by their value-to-weight ratio in descending order
+    sort(items.begin(), items.end(), compare);
+
+    double maxValue = 0.0; // Initialize total maximum value that can be obtained
+
+    // Loop through each item
+    for (auto& item : items) {
+        if (capacity >= item.weight) {
+            // If the knapsack can carry the entire item weight
+            maxValue += item.value; // Add the full item value
+            capacity -= item.weight; // Decrease knapsack capacity by item's weight
+        } else {
+            // If the knapsack cannot carry the entire item weight, take fraction
+            double valuePerWeight = item.valueToWeightRatio(); // Value-to-weight ratio
+            maxValue += valuePerWeight * capacity; // Add fraction of the item's value
+            capacity = 0; // Knapsack is full
+            break; // No more items can be added
+        }
+    }
+
+    // Output the maximum value obtained
+    cout << "Maximum value that can be obtained in the knapsack: " << maxValue << endl;
+
+    return 0;
+}
+
+/*
+Example output:
+
+Enter the number of items: 4
+Enter value and weight of item 1: 60 10
+Enter value and weight of item 2: 100 20
+Enter value and weight of item 3: 120 30
+Enter value and weight of item 4: 90 25
+Enter the maximum capacity of the knapsack: 50
+
+After sorting items by value-to-weight ratio in descending order:
+Item 1: Value = 60, Weight = 10 (Ratio = 6.0)
+Item 2: Value = 100, Weight = 20 (Ratio = 5.0)
+Item 3: Value = 120, Weight = 30 (Ratio = 4.0)
+Item 4: Value = 90, Weight = 25 (Ratio = 3.6)
+
+Knapsack process:
+- Add Item 1 (Value = 60, Weight = 10) fully to the knapsack
+- Remaining capacity = 50 - 10 = 40, Total value = 60
+- Add Item 2 (Value = 100, Weight = 20) fully to the knapsack
+- Remaining capacity = 40 - 20 = 20, Total value = 160
+- Take fraction of Item 3 (Value = 120, Weight = 30)
+- Fraction of Item 3 = (Value-to-weight ratio) * Remaining capacity = 4.0 * 20 = 80
+- Remaining capacity = 0, Total value = 160 + 80 = 240
+- Item 4 is not considered as the knapsack is full.
+
+Output:
+Maximum value that can be obtained in the knapsack: 240
+*/
