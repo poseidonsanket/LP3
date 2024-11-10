@@ -1,0 +1,79 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+// Function to check if placing a queen at (row, col) is safe
+bool isSafe(vector<vector<int>>& board, int row, int col, int N) {
+    // Check the row on the left side
+    for (int i = 0; i < col; i++) {
+        if (board[row][i]) return false;
+    }
+
+    // Check the upper diagonal on the left side
+    for (int i = row, j = col; i >= 0 && j >= 0; i--, j--) {
+        if (board[i][j]) return false;
+    }
+
+    // Check the lower diagonal on the left side
+    for (int i = row, j = col; i < N && j >= 0; i++, j--) {
+        if (board[i][j]) return false;
+    }
+
+    // If no queens are attacking, it's safe to place the queen
+    return true;
+}
+
+// Utility function to solve the N-Queens problem
+bool solveNQueensUtil(vector<vector<int>>& board, int col, int N) {
+    // If all queens are placed, return true
+    if (col >= N) return true;
+
+    // Try placing a queen in each row in the current column
+    for (int i = 0; i < N; i++) {
+        // Check if it's safe to place the queen at (i, col)
+        if (isSafe(board, i, col, N)) {
+            // Place the queen
+            board[i][col] = 1;
+
+            // Recursively place the rest of the queens
+            if (solveNQueensUtil(board, col + 1, N)) return true;
+
+            // If placing queen here leads to a solution, leave it as is
+            // Otherwise, backtrack and remove the queen
+            board[i][col] = 0;
+        }
+    }
+
+    // If no placement is possible in this column, return false
+    return false;
+}
+
+// Function to print the board with the queens' positions
+void printBoard(const vector<vector<int>>& board, int N) {
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            if (board[i][j] == 1) cout << "Q "; // 'Q' represents a queen
+            else cout << ". "; // '.' represents an empty space
+        }
+        cout << endl;
+    }
+}
+
+int main() {
+    int N;
+    cout << "Enter the size of the board (N): ";
+    cin >> N;
+
+    // Initialize an N x N board filled with 0's
+    vector<vector<int>> board(N, vector<int>(N, 0));
+
+    // Attempt to solve the N-Queens problem
+    if (!solveNQueensUtil(board, 0, N)) {
+        cout << "Solution does not exist" << endl;
+    } else {
+        cout << "One of the possible solutions:\n";
+        printBoard(board, N);
+    }
+
+    return 0;
+}
