@@ -1,0 +1,89 @@
+from queue import Queue
+
+class Item:
+    def __init__(self, weight, value):
+        self.weight = weight
+        self.value = value
+        self.ratio = value / weight
+
+class Node:
+    def __init__(self, level, profit, weight, bound):
+        self.level = level
+        self.profit = profit
+        self.weight = weight
+        self.bound = bound
+
+def compare_items(item):
+    return item.ratio
+
+def bound(u, n, W, items):
+    if u.weight >= W:
+        return 0
+    profit_bound = u.profit
+    j = u.level + 1
+    totweight = u.weight
+
+    while j < n and totweight + items[j].weight <= W:
+        totweight += items[j].weight
+        profit_bound += items[j].value
+        j += 1
+
+    if j < n:
+        profit_bound += (W - totweight) * items[j].ratio
+
+    return profit_bound
+
+def knapsack(W, items):
+    n = len(items)
+    items.sort(key=compare_items, reverse=True)
+
+    Q = Queue()
+    u = Node(-1, 0, 0, 0)
+    Q.put(u)
+
+    max_profit = 0
+
+    while not Q.empty():
+        u = Q.get()
+
+        if u.level == -1:
+            v = Node(0, 0, 0, 0)
+        elif u.level == n - 1:
+            continue
+        else:
+            v = Node(u.level + 1, 0, 0, 0)
+
+        v.weight = u.weight + items[v.level].weight
+        v.profit = u.profit + items[v.level].value
+
+        if v.weight <= W and v.profit > max_profit:
+            max_profit = v.profit
+
+        v.bound = bound(v, n, W, items)
+
+        if v.bound > max_profit:
+            Q.put(v)
+
+        v = Node(u.level + 1, u.profit, u.weight, 0)
+        v.bound = bound(v, n, W, items)
+
+        if v.bound > max_profit:
+            Q.put(v)
+
+    return max_profit
+
+# Input section
+W = int(input("Enter the knapsack capacity: "))
+n = int(input("Enter the number of items: "))
+
+items = []
+for i in range(n):
+    weight = int(input(f"Enter the weight of item {i+1}: "))
+    value = int(input(f"Enter the value of item {i+1}: "))
+    items.append(Item(weight, value))
+
+for item in items:
+    item.ratio = item.value / item.weight
+
+max_value = knapsack(W, items)
+print(f"Maximum value: {max_value}")
